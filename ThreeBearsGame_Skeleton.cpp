@@ -30,10 +30,10 @@ const int  SIZEY(11);		//vertical dimension
 //defining symbols used for display of the grid and content
 const char BEAR('@');   	//bear
 const char TUNNEL(' ');    	//tunnel
-const char WALL('#'); 
+const char WALL('#'); 		//Border
 const char BOMB('0');		//Bomb
 const char TRIGGER('T');	//Trigger
-const char EXIT('X');		//Exit//border
+const char EXIT('X');		//Exit
 //defining the command letters to move the bear on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
