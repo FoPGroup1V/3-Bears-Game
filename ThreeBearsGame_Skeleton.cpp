@@ -9,7 +9,6 @@
 //---------------------------------------------------------------------------
 
 //include standard libraries
-BEAR IS SO COOL
 #include <iostream>	
 #include <iomanip> 
 #include <conio.h> 
