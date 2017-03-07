@@ -16,6 +16,7 @@
 #include <string>
 #include <sstream>
 #include <stdlib.h>
+#include <ctime>
 using namespace std;
 
 //include our own libraries
@@ -285,10 +286,12 @@ void paintGame(const char g[][SIZEX], string mess, string& playerName)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	void paintGrid(const char g[][SIZEX]);
-
+	void paintGrid(const char g[][SIZEX]); 
+	time_t now = time(0);
+	char* dt = ctime(&now);
 	//display Player Name
-	showMessage(clWhite, clRed, 60, 0, playerName);
+	showMessage(clWhite, clRed, 40, 0, playerName);
+	showMessage(clWhite, clRed, 40, 1, dt);
 
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
