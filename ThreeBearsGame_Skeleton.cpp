@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c – group assignment
+//Program: Skeleton for Task 1c â€“ group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
@@ -9,6 +9,7 @@
 //---------------------------------------------------------------------------
 
 //include standard libraries
+BEAR IS SO COOL
 #include <iostream>	
 #include <iomanip> 
 #include <conio.h> 
