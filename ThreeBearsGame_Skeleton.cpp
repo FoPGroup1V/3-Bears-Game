@@ -1,5 +1,6 @@
+
 //---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c â€“ group assignment
+//Program: Skeleton for Task 1c – group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
@@ -10,7 +11,7 @@
 
 //include standard libraries
 //BEAR IS SO COOL
-#include <iostream>	
+#include <iostream>    
 #include <iomanip> 
 #include <conio.h> 
 #include <cassert> 
@@ -19,29 +20,29 @@
 using namespace std;
 
 //include our own libraries
-#include "ConsoleUtils.h"	//for Clrscr, Gotoxy, etc.
+#include "ConsoleUtils.h"    //for Clrscr, Gotoxy, etc.
 
 //---------------------------------------------------------------------------
 //----- define constants
 //---------------------------------------------------------------------------
 
 //defining the size of the grid
-const int  SIZEX(16);    	//horizontal dimension
-const int  SIZEY(11);		//vertical dimension
+const int  SIZEX(16);        //horizontal dimension
+const int  SIZEY(11);        //vertical dimension
 //defining symbols used for display of the grid and content
-const char BEAR('@');   	//bear
-const char TUNNEL(' ');    	//tunnel
-const char WALL('#'); 
-const char BOMB('0');		//Bomb
-const char TRIGGER('T');	//Trigger
-const char EXIT('X');		//Exit//border
+const char BEAR('@');       //bear
+const char TUNNEL(' ');        //tunnel
+const char WALL('#');		//Wall
+const char BOMB('0');        //Bomb
+const char TRIGGER('T');    //Trigger
+const char EXIT('X');        //Exit//border
 //defining the command letters to move the bear on the maze
-const int  UP(72);			//up arrow
-const int  DOWN(80); 		//down arrow
-const int  RIGHT(77);		//right arrow
-const int  LEFT(75);		//left arrow
+const int  UP(72);            //up arrow
+const int  DOWN(80);         //down arrow
+const int  RIGHT(77);        //right arrow
+const int  LEFT(75);        //left arrow
 //defining the other command letters
-const char QUIT('Q');		//to end the game
+const char QUIT('Q');        //to end the game
 
 struct Item {
 	int x, y;
@@ -60,7 +61,7 @@ int main()
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess);
+	void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess,Item& bearTwo, Item& bearThree);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
 	void endProgram();
 	//local variable declarations 
@@ -72,29 +73,29 @@ int main()
 	//structure of the maze
 
 	//bear's position and symbol
-	Item bear = { 0, 0, BEAR}; 	
+	Item bear = { 0, 0, BEAR };
 	Item bearTwo = { 0, 0, BEAR };
 	Item bearThree = { 0, 0, BEAR };
 
-	string message("LET'S START...");	//current message to player
+	string message("LET'S START...");    //current message to player
 
 	//action...
-	initialiseGame(grid, maze, bear, bearTwo, bearThree);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message);			//display game info, modified grid & messages
-	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
-	while (!wantsToQuit(key))			//while user does not want to quit
+	initialiseGame(grid, maze, bear, bearTwo, bearThree);    //initialise grid (incl. walls & bear)
+	paintGame(grid, message);            //display game info, modified grid & messages
+	int key(getKeyPress());             //read in  selected key: arrow or letter command
+	while (!wantsToQuit(key))            //while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
-			updateGameData(grid, bear, key, message);		//move bear in that direction
-			updateGrid(grid, maze, bear, bearTwo, bearThree);			//update grid information
+			updateGameData(grid, bear, key, message, bearTwo, bearThree);        //move bear in that direction
+			updateGrid(grid, maze, bear, bearTwo, bearThree);            //update grid information
 		}
 		else
-			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message);		//display game info, modified grid & messages
-		key = getKeyPress(); 			//display menu & read in next option
+			message = "INVALID KEY!";    //set 'Invalid key' message
+		paintGame(grid, message);        //display game info, modified grid & messages
+		key = getKeyPress();             //display menu & read in next option
 	}
-	endProgram();						//display final message
+	endProgram();                        //display final message
 	return 0;
 }
 
@@ -109,16 +110,16 @@ void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& bear, Item& be
 	void setInitialDataFromMaze(char maze[][SIZEX], Item& b, Item& b2, Item& b3);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item b2, Item b3);
 
-	setInitialMazeStructure(maze);		//initialise maze
-	setInitialDataFromMaze(maze, bear, bearTwo, bearThree);	//initialise bear's position
-	updateGrid(grid, maze, bear, bearTwo, bearThree);		//prepare grid
+	setInitialMazeStructure(maze);        //initialise maze
+	setInitialDataFromMaze(maze, bear, bearTwo, bearThree);    //initialise bear's position
+	updateGrid(grid, maze, bear, bearTwo, bearThree);        //prepare grid
 }
 
-void setInitialMazeStructure(char maze[][SIZEX])
+void setInitialMazeStructure(char maze[SIZEY][SIZEX])
 { //set the position of the walls in the maze
 	//initialise maze configuration
-	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+	int initialMaze[SIZEY][SIZEX]     //local array to store the maze structure
+	  { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 		{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
@@ -152,20 +153,20 @@ void setInitialDataFromMaze(char maze[][SIZEX], Item& bear, Item& bearTwo, Item&
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (maze[row][col])
+		{
+			case BEAR:
 			{
-				case BEAR:
-				{
-					bear.x = col;
-					bear.y = row;
-					bearTwo.x = col;
-					bearTwo.y = row;
-					bearThree.x = col;
-					bearThree.y = row;
-					maze[row][col] = TUNNEL;
-				}
-				break;
-				//will work for other items too
+				bear.x = col;
+				bear.y = row;
+				bearTwo.x = col;
+				bearTwo.y = row;
+				bearThree.x = col;
+				bearThree.y = row;
+				maze[row][col] = TUNNEL;
 			}
+			break;
+			//will work for other items too
+		}
 }
 
 //---------------------------------------------------------------------------
@@ -174,29 +175,29 @@ void setInitialDataFromMaze(char maze[][SIZEX], Item& bear, Item& bearTwo, Item&
 
 void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
 { //update grid configuration after each move
-	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
+	void setMaze(char g[][SIZEX], const char b[SIZEY][SIZEX]);
 	void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
-	
 
-	setMaze(grid, maze);	//reset the empty maze configuration into grid
+
+	setMaze(grid, maze);    //reset the empty maze configuration into grid
 	placeBears(grid, bear, bearTwo, bearThree);
-	
-		//set bear in grid
+
+	//set bear in grid
 }
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 { //reset the empty/fixed maze configuration into grid
-	for (int row(0); row < SIZEY; ++row)	
-		for (int col(0); col < SIZEX; ++col)	
+	for (int row(0); row < SIZEY; ++row)
+		for (int col(0); col < SIZEX; ++col)
 			grid[row][col] = maze[row][col];
 }
 
 void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
 { //place bear at its new position in grid
 	g[bear.y][bear.x] = bear.symbol;
-	g[bearTwo.y][bearTwo.x + 1] = bearTwo.symbol;
-	g[bearThree.y][bearThree.x - 2] = bearThree.symbol;
-	
+	g[bearTwo.y - 1][bearTwo.x ] = bearTwo.symbol;
+	g[bearThree.y - 2][bearThree.x] = bearThree.symbol;
+
 }
 
 
@@ -204,35 +205,44 @@ void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess)
+void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess, Item& bearTwo, Item&bearThree)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	assert(isArrowKey(key));
-	
+
 	//reset message to blank
-	mess = "                                         ";		//reset message to blank
+	mess = "                                         ";        //reset message to blank
 
 	//calculate direction of movement for given key
 	int dx(0), dy(0);
-	setKeyDirection(key, dx, dy); 
+	setKeyDirection(key, dx, dy);
 
 	//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-	switch (g[bear.y + dy][bear.x + dx])
-	{			//...depending on what's on the target position in grid...
-	case TUNNEL:		//can move
-		bear.y += dy;	//go in that Y direction
-		bear.x += dx;	//go in that X direction
-		break;
-	case WALL:  		//hit a wall and stay there
-		cout << '\a';	//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
-	case BEAR:
-		cout << '\a';	//beep the alarm
-		mess = "CANNOT GO THERE!";
+	switch (g[bear.y + dy][bear.x + dx], g[bearTwo.y+dy][bearTwo.x+dx], g[bearThree.y+dy][bearThree.x+dx])
+		//create new array for wall collision
+	{            //...depending on what's on the target position in grid...
+	case TUNNEL:        //can move
+		bear.y += dy;    //go in that Y direction
+		bear.x += dx;    //go in that X direction
+		bearTwo.y += dy;    //go in that Y direction
+		bearTwo.x += dx;    //go in that X direction
+		bearThree.y += dy;    //go in that Y direction
+		bearThree.x += dx;    //go in that X direction
 		break;
 	}
+
+
+	//case WALL:          //hit a wall and stay there
+	//	bear.y;
+	//	bear.x;
+	//	bearTwo.y;
+	//	bearTwo.x;
+	//	bearThree.y;
+	//	bearThree.x;
+	//	cout << '\a'; //beep the alarm
+	//	mess = "CANNOT GO THERE!";
+	//	break;
 
 }
 //---------------------------------------------------------------------------
@@ -242,23 +252,23 @@ void setKeyDirection(const int key, int& dx, int& dy)
 { //calculate direction indicated by key
 	bool isArrowKey(const int k);
 	assert(isArrowKey(key));
-	switch (key)	//...depending on the selected key...
+	switch (key)    //...depending on the selected key...
 	{
-	case LEFT:  	//when LEFT arrow pressed...
-		dx = -1;	//decrease the X coordinate
+	case LEFT:       //when LEFT arrow pressed...
+		dx = -1;     //decrease the X coordinate
 		dy = 0;
 		break;
-	case RIGHT: 	//when RIGHT arrow pressed...
-		dx = +1;	//increase the X coordinate
+	case RIGHT:      //when RIGHT arrow pressed...
+		dx = +1;     //increase the X coordinate
 		dy = 0;
 		break;
-	case UP: 		//when UP arrow pressed...
+	case UP:         //when UP arrow pressed...
 		dx = 0;
-		dy = -1;	//decrease the Y coordinate
+		dy = -1;    //decrease the Y coordinate
 		break;
-	case DOWN: 		//when DOWN arrow pressed...
+	case DOWN:      //when DOWN arrow pressed...
 		dx = 0;
-		dy = +1;	//increase the Y coordinate
+		dy = +1;    //increase the Y coordinate
 		break;
 	}
 }
@@ -267,18 +277,18 @@ int getKeyPress()
 { //get key or command (in uppercase) selected by user
 	//KEEP THIS FUNCTION AS GIVEN
 	int keyPressed;
-	keyPressed = _getch();			//read in the selected arrow key or command letter
-	while (keyPressed == 224) 		//ignore symbol following cursor key
+	keyPressed = _getch();            //read in the selected arrow key or command letter
+	while (keyPressed == 224)         //ignore symbol following cursor key
 		keyPressed = _getch();
-	return toupper(keyPressed);		//return it in uppercase 
+	return toupper(keyPressed);        //return it in uppercase 
 }
 
 bool isArrowKey(const int key)
-{	//check if the key pressed is an arrow key (also accept 'K', 'M', 'H' and 'P')
-	return (key == LEFT) || (key == RIGHT) || (key == UP) || (key == DOWN);
+{    //check if the key pressed is an arrow key (also accept 'K', 'M', 'H' and 'P')
+	return (key == LEFT) || (key == RIGHT) || (key == DOWN) ||  (key == UP);
 }
 bool wantsToQuit(const int key)
-{	//check if the user wants to quit (when key is 'Q' or 'q')
+{    //check if the user wants to quit (when key is 'Q' or 'q')
 	return toupper(key) == QUIT;
 }
 
@@ -287,9 +297,9 @@ bool wantsToQuit(const int key)
 //---------------------------------------------------------------------------
 
 string tostring(char x) {
-    std::ostringstream os;
-    os << x;
-    return os.str();
+	std::ostringstream os;
+	os << x;
+	return os.str();
 }
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message)
 {
@@ -313,8 +323,8 @@ void paintGame(const char g[][SIZEX], string mess)
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
 
 	//print auxiliary messages if any
-	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
-	
+	showMessage(clBlack, clWhite, 40, 8, mess);    //display current message
+
 	// display grid contents
 	paintGrid(g);
 }
@@ -327,7 +337,7 @@ void paintGrid(const char g[][SIZEX])
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
-			cout << g[row][col];	//output cell content
+			cout << g[row][col];    //output cell content
 		cout << endl;
 	}
 }
@@ -335,6 +345,8 @@ void paintGrid(const char g[][SIZEX])
 void endProgram()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	showMessage(clRed, clYellow, 40, 8, "");	//hold output screen until a keyboard key is hit
+	showMessage(clRed, clYellow, 40, 8, "");    //hold output screen until a keyboard key is hit
 	system("pause");
 }
+
+
