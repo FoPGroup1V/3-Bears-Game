@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c â€“ group assignment
+//Program: Skeleton for Task 1c – group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
@@ -16,6 +16,7 @@
 #include <cassert> 
 #include <string>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 //include our own libraries
@@ -31,7 +32,7 @@ const int  SIZEY(11);		//vertical dimension
 //defining symbols used for display of the grid and content
 const char BEAR('@');   	//bear
 const char TUNNEL(' ');    	//tunnel
-const char WALL('#'); 
+const char WALL('#');
 const char BOMB('0');		//Bomb
 const char TRIGGER('T');	//Trigger
 const char EXIT('X');		//Exit//border
@@ -52,16 +53,18 @@ struct Item {
 //----- run game
 //---------------------------------------------------------------------------
 
+
 int main()
 {
+	
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bears);
 	void paintGame(const char g[][SIZEX], string mess);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
+	void updateGameData(const char g[][SIZEX], vector<Item>& theBears, int key, string& mess);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& bears);
 	void endProgram();
 	//local variable declarations 
 
@@ -71,23 +74,23 @@ int main()
 	char maze[SIZEY][SIZEX];
 	//structure of the maze
 
-	//bear's position and symbol
-	Item bear = { 0, 0, BEAR}; 	
-	Item bearTwo = { 0, 0, BEAR };
-	Item bearThree = { 0, 0, BEAR };
+	Item bear = { 0, 0, BEAR };
+	Item bearTwo = { 0, 1, BEAR };
+	Item bearThree = { 0, 2, BEAR };
+	vector<Item> theBears = { bear, bearTwo, bearThree};//Bears vector
 
 	string message("LET'S START...");	//current message to player
 
 	//action...
-	initialiseGame(grid, maze, bear, bearTwo, bearThree);	//initialise grid (incl. walls & bear)
+	initialiseGame(grid, maze, theBears);	//initialise grid (incl. walls & bear)
 	paintGame(grid, message);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
 		if (isArrowKey(key))
 		{
-			updateGameData(grid, bear, key, message);		//move bear in that direction
-			updateGrid(grid, maze, bear, bearTwo, bearThree);			//update grid information
+			updateGameData(grid, theBears, key, message);		//move bear in that direction
+			updateGrid(grid, maze, theBears);					//update grid information
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
@@ -103,28 +106,28 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX],  vector<Item>& theBears)
 { //initialise grid & place bear in middle
-	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setInitialDataFromMaze(char maze[][SIZEX], Item& b, Item& b2, Item& b3);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item b2, Item b3);
+	void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears);
+	void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& theBears);
 
-	setInitialMazeStructure(maze);		//initialise maze
-	setInitialDataFromMaze(maze, bear, bearTwo, bearThree);	//initialise bear's position
-	updateGrid(grid, maze, bear, bearTwo, bearThree);		//prepare grid
+	setInitialMazeStructure(maze, theBears);		//initialise maze
+	setInitialDataFromMaze(maze, theBears);	//initialise bear's position
+	updateGrid(grid, maze, theBears);		//prepare grid
 }
 
-void setInitialMazeStructure(char maze[][SIZEX])
+void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
+    = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 0, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
 		{ 1, 2, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 },
 		{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1 },
 		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
@@ -147,93 +150,91 @@ void setInitialMazeStructure(char maze[][SIZEX])
 		}
 	}
 }
-void setInitialDataFromMaze(char maze[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree)
+void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears)
 { //extract bear's coordinates from initial maze info
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
+			for (int i = 0; i < theBears.size(); i++)
 			switch (maze[row][col])
+		{
+			case BEAR:
 			{
-				case BEAR:
-				{
-					bear.x = col;
-					bear.y = row;
-					bearTwo.x = col;
-					bearTwo.y = row;
-					bearThree.x = col;
-					bearThree.y = row;
-					maze[row][col] = TUNNEL;
-				}
-				break;
-				//will work for other items too
+				theBears[i].x = col;
+				theBears[i].y = row;
+				maze[row][col] = TUNNEL;
 			}
+			break;
+			//will work for other items too
+		}
 }
 
 //---------------------------------------------------------------------------
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], vector<Item>& theBears)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
-	void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
-	
+	void placeBears(char g[][SIZEX], vector<Item>& theBears);
+
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
-	placeBears(grid, bear, bearTwo, bearThree);
-	
-		//set bear in grid
+	placeBears(grid, theBears);
+
+	//set bear in grid
 }
 
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 { //reset the empty/fixed maze configuration into grid
-	for (int row(0); row < SIZEY; ++row)	
-		for (int col(0); col < SIZEX; ++col)	
+	for (int row(0); row < SIZEY; ++row)
+		for (int col(0); col < SIZEX; ++col)
 			grid[row][col] = maze[row][col];
 }
 
-void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
+void placeBears(char g[][SIZEX], vector<Item>& theBears)
 { //place bear at its new position in grid
-	g[bear.y][bear.x] = bear.symbol;
-	g[bearTwo.y][bearTwo.x + 1] = bearTwo.symbol;
-	g[bearThree.y][bearThree.x - 2] = bearThree.symbol;
-	
-}
+	for (int i = 0; i < theBears.size(); i++) //for Loop for passing x and y into bears vector
 
+	g[theBears[i].y][theBears[i].x] = theBears[i].symbol;
+}
 
 
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess)
+void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key, string& mess)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	assert(isArrowKey(key));
-	
+
 	//reset message to blank
 	mess = "                                         ";		//reset message to blank
-
+	
 	//calculate direction of movement for given key
 	int dx(0), dy(0);
-	setKeyDirection(key, dx, dy); 
-
+	setKeyDirection(key, dx, dy);
+	for (int i = 0; i < theBears.size(); i++)
 	//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-	switch (g[bear.y + dy][bear.x + dx])
+	switch (g[theBears[i].y + dy][theBears[i].x + dx])
 	{			//...depending on what's on the target position in grid...
-	case TUNNEL:		//can move
-		bear.y += dy;	//go in that Y direction
-		bear.x += dx;	//go in that X direction
+	case TUNNEL:			//can move
+		theBears[i].y += dy;		//go in that Y direction
+		theBears[i].x += dx;		//go in that X direction
+		//bearTwo.y += dy;	//go in that Y direction
+		//bearTwo.x += dx;	//go in that X direction
+		//bearThree.y += dy;	//go in that Y direction
+		//bearThree.x += dx;	//go in that X direction
 		break;
-	case WALL:  		//hit a wall and stay there
-		cout << '\a';	//beep the alarm
+	case WALL:  			//hit a wall and stay there
+		cout << '\a';		//beep the alarm
 		mess = "CANNOT GO THERE!";
 		break;
 	case BEAR:
-		cout << '\a';	//beep the alarm
+		cout << '\a';		//beep the alarm
 		mess = "CANNOT GO THERE!";
 		break;
 	}
-
 }
 //---------------------------------------------------------------------------
 //----- process key
@@ -287,9 +288,9 @@ bool wantsToQuit(const int key)
 //---------------------------------------------------------------------------
 
 string tostring(char x) {
-    std::ostringstream os;
-    os << x;
-    return os.str();
+	std::ostringstream os;
+	os << x;
+	return os.str();
 }
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message)
 {
@@ -314,7 +315,7 @@ void paintGame(const char g[][SIZEX], string mess)
 
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
-	
+
 	// display grid contents
 	paintGrid(g);
 }
@@ -338,3 +339,4 @@ void endProgram()
 	showMessage(clRed, clYellow, 40, 8, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
+
