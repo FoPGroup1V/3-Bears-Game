@@ -56,6 +56,7 @@ struct Item {
 
 int main()
 {
+
 	string playerName;
 
 	void mainMenu(string&);
@@ -63,10 +64,9 @@ int main()
 	//calls the main menu
 	mainMenu(playerName);
 
-
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bears);
-	void paintGame(const char g[][SIZEX], string mess, string& playerName);
+	void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -81,16 +81,16 @@ int main()
 	char maze[SIZEY][SIZEX];
 	//structure of the maze
 
-	Item bear = { 0, 0, BEAR };
-	Item bearTwo = { 0, 1, BEAR };
-	Item bearThree = { 0, 2, BEAR };
+	Item bear = { 1, 0, BEAR };
+	Item bearTwo = { 1, 1, BEAR };
+	Item bearThree = { 1, 2, BEAR };
 	vector<Item> theBears = { bear, bearTwo, bearThree };//Bears vector
 
 	string message("LET'S START...");	//current message to player
 
 	//action...
 	initialiseGame(grid, maze, theBears);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, playerName);			//display game info, modified grid & messages
+	paintGame(grid, message, theBears, BEAR, playerName);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
@@ -101,7 +101,7 @@ int main()
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message, playerName);		//display game info, modified grid & messages
+		paintGame(grid, message, theBears, BEAR, playerName);		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -239,10 +239,7 @@ void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key
 		case TUNNEL:			//can move
 			theBears[i].y += dy;		//go in that Y direction
 			theBears[i].x += dx;		//go in that X direction
-			//bearTwo.y += dy;	//go in that Y direction
-			//bearTwo.x += dx;	//go in that X direction
-			//bearThree.y += dy;	//go in that Y direction
-			//bearThree.x += dx;	//go in that X direction
+
 			break;
 		case WALL:  			//hit a wall and stay there
 			cout << '\a';		//beep the alarm
@@ -251,6 +248,14 @@ void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key
 		case BEAR:
 			cout << '\a';		//beep the alarm
 			mess = "CANNOT GO THERE!";
+			break;
+
+		case EXIT:
+			cout << '\a';
+			int countBear = 0;
+			theBears.erase(theBears.begin() + i);
+			mess = "BEAR SAVED!";
+			countBear + 1;
 			break;
 	}
 }
@@ -317,7 +322,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, string& playerName)
+void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -337,6 +342,15 @@ void paintGame(const char g[][SIZEX], string mess, string& playerName)
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
+	//display rescued bears
+
+	showMessage(clBlack, clYellow, 0, 2, "Rescued Bears: ");
+
+
+
+	//print auxiliary messages if any
+	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
+
 	// display grid contents
 	paintGrid(g);
 }
@@ -345,7 +359,7 @@ void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	SelectBackColour(clBlack);
 	SelectTextColour(clWhite);
-	Gotoxy(0, 2);
+	Gotoxy(0, 6);
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
