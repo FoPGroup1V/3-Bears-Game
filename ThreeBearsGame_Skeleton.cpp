@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c – group assignment
+//Program: Skeleton for Task 1c ï¿½ group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
@@ -56,10 +56,17 @@ struct Item {
 
 int main()
 {
-	
+	string playerName;
+
+	void mainMenu(string&);
+
+	//calls the main menu
+	mainMenu(playerName);
+
+
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bears);
-	void paintGame(const char g[][SIZEX], string mess);
+	void paintGame(const char g[][SIZEX], string mess, string& playerName);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -77,13 +84,13 @@ int main()
 	Item bear = { 0, 0, BEAR };
 	Item bearTwo = { 0, 1, BEAR };
 	Item bearThree = { 0, 2, BEAR };
-	vector<Item> theBears = { bear, bearTwo, bearThree};//Bears vector
+	vector<Item> theBears = { bear, bearTwo, bearThree };//Bears vector
 
 	string message("LET'S START...");	//current message to player
 
 	//action...
 	initialiseGame(grid, maze, theBears);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message);			//display game info, modified grid & messages
+	paintGame(grid, message, playerName);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
@@ -94,19 +101,30 @@ int main()
 		}
 		else
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message);		//display game info, modified grid & messages
+		paintGame(grid, message, playerName);		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
 	return 0;
 }
 
+void mainMenu(string& playerName)
+{
+	void showMessage(WORD backColour, WORD textColour, int x, int y, const string message);
+	showMessage(clRed, clYellow, 40, 10, "3 Bears Project 2016-17");
+	showMessage(clRed, clYellow, 40, 11, "Team DAB 2.0");
+	showMessage(clBlue, clWhite, 40, 12, "Player Name: ");
+	cin >> playerName;		//allows the player to enter his name
+	SelectBackColour(clBlack);		//resets the background colour to black when the screen clears
+	Clrscr();
+
+}
 
 //---------------------------------------------------------------------------
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX],  vector<Item>& theBears)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Item>& theBears)
 { //initialise grid & place bear in middle
 	void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears);
 	void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears);
@@ -121,7 +139,7 @@ void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-    = { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 		{ 1, 0, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
@@ -155,17 +173,17 @@ void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears)
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			for (int i = 0; i < theBears.size(); i++)
-			switch (maze[row][col])
-		{
-			case BEAR:
+				switch (maze[row][col])
 			{
-				theBears[i].x = col;
-				theBears[i].y = row;
-				maze[row][col] = TUNNEL;
+				case BEAR:
+				{
+					theBears[i].x = col;
+					theBears[i].y = row;
+					maze[row][col] = TUNNEL;
+				}
+				break;
+				//will work for other items too
 			}
-			break;
-			//will work for other items too
-		}
 }
 
 //---------------------------------------------------------------------------
@@ -195,7 +213,7 @@ void placeBears(char g[][SIZEX], vector<Item>& theBears)
 { //place bear at its new position in grid
 	for (int i = 0; i < theBears.size(); i++) //for Loop for passing x and y into bears vector
 
-	g[theBears[i].y][theBears[i].x] = theBears[i].symbol;
+		g[theBears[i].y][theBears[i].x] = theBears[i].symbol;
 }
 
 
@@ -210,30 +228,30 @@ void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key
 
 	//reset message to blank
 	mess = "                                         ";		//reset message to blank
-	
+
 	//calculate direction of movement for given key
 	int dx(0), dy(0);
 	setKeyDirection(key, dx, dy);
 	for (int i = 0; i < theBears.size(); i++)
-	//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-	switch (g[theBears[i].y + dy][theBears[i].x + dx])
+		//check new target position in grid and update game data (incl. bear coordinates) if move is possible
+		switch (g[theBears[i].y + dy][theBears[i].x + dx])
 	{			//...depending on what's on the target position in grid...
-	case TUNNEL:			//can move
-		theBears[i].y += dy;		//go in that Y direction
-		theBears[i].x += dx;		//go in that X direction
-		//bearTwo.y += dy;	//go in that Y direction
-		//bearTwo.x += dx;	//go in that X direction
-		//bearThree.y += dy;	//go in that Y direction
-		//bearThree.x += dx;	//go in that X direction
-		break;
-	case WALL:  			//hit a wall and stay there
-		cout << '\a';		//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
-	case BEAR:
-		cout << '\a';		//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
+		case TUNNEL:			//can move
+			theBears[i].y += dy;		//go in that Y direction
+			theBears[i].x += dx;		//go in that X direction
+			//bearTwo.y += dy;	//go in that Y direction
+			//bearTwo.x += dx;	//go in that X direction
+			//bearThree.y += dy;	//go in that Y direction
+			//bearThree.x += dx;	//go in that X direction
+			break;
+		case WALL:  			//hit a wall and stay there
+			cout << '\a';		//beep the alarm
+			mess = "CANNOT GO THERE!";
+			break;
+		case BEAR:
+			cout << '\a';		//beep the alarm
+			mess = "CANNOT GO THERE!";
+			break;
 	}
 }
 //---------------------------------------------------------------------------
@@ -299,11 +317,14 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess)
+void paintGame(const char g[][SIZEX], string mess, string& playerName)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintGrid(const char g[][SIZEX]);
+
+	//display Player Name
+	showMessage(clWhite, clRed, 40, 0, playerName);
 
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
@@ -339,4 +360,3 @@ void endProgram()
 	showMessage(clRed, clYellow, 40, 8, "");	//hold output screen until a keyboard key is hit
 	system("pause");
 }
-
