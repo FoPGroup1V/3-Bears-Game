@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <ctime>
+#include <stdio.h>
 using namespace std;
 
 //include our own libraries
@@ -28,7 +29,7 @@ using namespace std;
 
 //defining the size of the grid
 const int  SIZEX(16);    	//horizontal dimension
-const int  SIZEY(11);		//vertical dimension	//6
+const int  SIZEY(11);		//vertical dimension
 //defining symbols used for display of the grid and content
 const char BEAR('@');   	//bear
 const char TUNNEL(' ');    	//tunnel
@@ -61,25 +62,28 @@ int main()
 
 	mainMenu(playerName);
 
+
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& bear);
-	void paintGame(const char g[][SIZEX], string mess, string& playerName);
+	void initialiseGame(char g[SIZEY][SIZEX], char m[SIZEY][SIZEX], Item& bear);
+	void paintGame(const char g[SIZEY][SIZEX], string mess, string& playerName, int actualScore);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item bear);
+	void updateGameData(const char g[SIZEY][SIZEX], Item& bear, const int key, string& mess);
+	void updateGrid(char g[SIZEY][SIZEX], const char m[SIZEY][SIZEX], const Item bear);
+	void score();
 	void endProgram();
 
 	//local variable declarations 
+	int actualScore;
 	char grid[SIZEY][SIZEX];	//grid for display
 	char maze[SIZEY][SIZEX];	//structure of the maze
-	Item bear = { 0, 0, BEAR}; 			//bear's position and symbol
+	Item bear = { 0, 0, BEAR }; 			//bear's position and symbol
 	string message("LET'S START...");	//current message to player
 
 	//action...
 	initialiseGame(grid, maze, bear);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, playerName);			//display game info, modified grid & messages
+	paintGame(grid, message, playerName, actualScore);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
@@ -89,102 +93,115 @@ int main()
 			updateGrid(grid, maze, bear);			//update grid information
 		}
 		else
+		{
 			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message, playerName);		//display game info, modified grid & messages
-		key = getKeyPress(); 			//display menu & read in next option
+			paintGame(grid, message, playerName, actualScore);		//display game info, modified grid & messages
+			key = getKeyPress(); 			//display menu & read in next option
+		}
 	}
+
 	endProgram();						//display final message
 	return 0;
 }
 void mainMenu(string& playerName)
 {
-		cout << "Enter your name: ";
-		cin >> playerName;
-		system("CLS");
+	void showMessage(WORD backColour, WORD textColour, int x, int y, const string message);
+	showMessage(clRed, clYellow, 40, 10, "3 Bears Project 2016-17");
+	showMessage(clRed, clYellow, 40, 11, "Team DAB 2.0");
+	showMessage(clBlue, clWhite, 40, 12, "Player Name: ");
+	cin >> playerName;
+		SelectBackColour(clBlack);
+	Clrscr();
+	
+}
+
+void score()
+{
+
 }
 
 //---------------------------------------------------------------------------
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& bear)
+void initialiseGame(char grid[SIZEY][SIZEX], char maze[SIZEY][SIZEX], Item& bear)
 { //initialise grid & place bear in middle
-	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setInitialDataFromMaze(char maze[][SIZEX], Item& b);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b);
+	void setInitialMazeStructure(char maze[SIZEY][SIZEX]);
+	void setInitialDataFromMaze(char maze[SIZEY][SIZEX], Item& b);
+	void updateGrid(char g[SIZEY][SIZEX], const char m[SIZEY][SIZEX], Item b);
 
 	setInitialMazeStructure(maze);		//initialise maze
 	setInitialDataFromMaze(maze, bear);	//initialise bear's position
 	updateGrid(grid, maze, bear);		//prepare grid
 }
 
-void setInitialMazeStructure(char maze[][SIZEX])
+void setInitialMazeStructure(char maze[SIZEY][SIZEX])
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
 		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-			{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
-			{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
-			{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
-			{ 1, 2, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
-			{ 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
-			{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
-			{ 1, 2, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 },
-			{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1 },
-			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-			{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+		{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
+		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
+		{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 },
+		{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
 	// with 1 for wall, 0 for tunnel, etc. 
 	//copy into maze structure
-	for (int row(0); row < SIZEY; ++row)	
+	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (initialMaze[row][col])
-			{
-				case 0: maze[row][col] = TUNNEL; break;
-				case 1: maze[row][col] = WALL; break;
-				case 2: maze[row][col] = BEAR; break;
-				case 3: maze[row][col] = BOMB; break;
-				case 4: maze[row][col] = TRIGGER; break;
-				case 5: maze[row][col] = EXIT; break;
-			}
+		{
+			case 0: maze[row][col] = TUNNEL; break;
+			case 1: maze[row][col] = WALL; break;
+			case 2: maze[row][col] = BEAR; break;
+			case 3: maze[row][col] = BOMB; break;
+			case 4: maze[row][col] = TRIGGER; break;
+			case 5: maze[row][col] = EXIT; break;
+		}
 }
-void setInitialDataFromMaze(char maze[][SIZEX], Item& bear) 
+void setInitialDataFromMaze(char maze[SIZEY][SIZEX], Item& bear)
 { //extract bear's coordinates from initial maze info
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (maze[row][col])
+		{
+			case BEAR:
 			{
-				case BEAR:
-				{
-					bear.x = col;
-					bear.y = row;
-					maze[row][col] = TUNNEL;
-				}
-				break;
-				//will work for other items too
+				bear.x = col;
+				bear.y = row;
+				maze[row][col] = TUNNEL;
 			}
+			break;
+			//will work for other items too
+		}
 }
 
 //---------------------------------------------------------------------------
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear)
+void updateGrid(char grid[SIZEY][SIZEX], const char maze[SIZEY][SIZEX], const Item bear)
 { //update grid configuration after each move
-	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
-	void placeBear(char g[][SIZEX], const Item bear);
+	void setMaze(char g[SIZEY][SIZEX], const char b[SIZEY][SIZEX]);
+	void placeBear(char g[SIZEY][SIZEX], const Item bear);
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
 	placeBear(grid, bear);	//set bear in grid
 }
 
-void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
+void setMaze(char grid[SIZEY][SIZEX], const char maze[SIZEY][SIZEX])
 { //reset the empty/fixed maze configuration into grid
-	for (int row(0); row < SIZEY; ++row)	
-		for (int col(0); col < SIZEX; ++col)	
+	for (int row(0); row < SIZEY; ++row)
+		for (int col(0); col < SIZEX; ++col)
 			grid[row][col] = maze[row][col];
 }
 
-void placeBear(char g[][SIZEX], const Item bear)
+void placeBear(char g[SIZEY][SIZEX], const Item bear)
 { //place bear at its new position in grid
 	g[bear.y][bear.x] = bear.symbol;
 }
@@ -192,18 +209,18 @@ void placeBear(char g[][SIZEX], const Item bear)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], Item& bear, const int key, string& mess)
+void updateGameData(const char g[SIZEY][SIZEX], Item& bear, const int key, string& mess)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	assert(isArrowKey(key));
-	
+
 	//reset message to blank
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
 	int dx(0), dy(0);
-	setKeyDirection(key, dx, dy); 
+	setKeyDirection(key, dx, dy);
 
 	//check new target position in grid and update game data (incl. bear coordinates) if move is possible
 	switch (g[bear.y + dy][bear.x + dx])
@@ -271,9 +288,9 @@ bool wantsToQuit(const int key)
 //---------------------------------------------------------------------------
 
 string tostring(char x) {
-    std::ostringstream os;
-    os << x;
-    return os.str();
+	std::ostringstream os;
+	os << x;
+	return os.str();
 }
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message)
 {
@@ -282,16 +299,14 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, string& playerName)
+void paintGame(const char g[SIZEY][SIZEX], string mess, string& playerName, int actualScore)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
-	void paintGrid(const char g[][SIZEX]); 
-	time_t now = time(0);
-	char* dt = ctime(&now);
+	void paintGrid(const char g[SIZEY][SIZEX]);
+
 	//display Player Name
 	showMessage(clWhite, clRed, 40, 0, playerName);
-	showMessage(clWhite, clRed, 40, 1, dt);
 
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
@@ -301,14 +316,16 @@ void paintGame(const char g[][SIZEX], string mess, string& playerName)
 	showMessage(clRed, clYellow, 40, 6, "TO MOVE USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 7, "TO QUIT ENTER 'Q'           ");
 
+	cout << endl << actualScore;
+
 	//print auxiliary messages if any
-	showMessage(clBlack, clWhite, 40, 9, mess);	//display current message
-	
+	showMessage(clBlack, clWhite, 40, 11, mess);	//display current message
+
 	// display grid contents
 	paintGrid(g);
 }
 
-void paintGrid(const char g[][SIZEX])
+void paintGrid(const char g[SIZEY][SIZEX])
 { //display grid content on screen
 	SelectBackColour(clBlack);
 	SelectTextColour(clWhite);
