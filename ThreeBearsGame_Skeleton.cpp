@@ -271,10 +271,10 @@ void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears,
 
 		case BOMB:
 		{
-					 cout << '\a';
-					 maze[theBears[i].y + dy][theBears[i].x + dx] = ' ';
-					 theBears.erase(theBears.begin() + i);
-					 mess = "BOMB HIT!";
+					 cout << '\a';                                       //Play an audio alert to let the player know
+					 maze[theBears[i].y + dy][theBears[i].x + dx] = ' '; //delete the bomb by modifying the maze
+					 theBears.erase(theBears.begin() + i);               //remove the bear from the vector
+					 mess = "BOMB HIT!";                                 //message the player that a bombs been hit
 			break;
 		}
 	}
