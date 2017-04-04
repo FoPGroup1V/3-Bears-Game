@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 //Program: Skeleton for Task 1c � group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
@@ -70,7 +70,7 @@ int main()
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void updateGameData(const char g[][SIZEX], vector<Item>& theBears, int key, string& mess);
+	void updateGameData(char g[][SIZEX], char m[][SIZEX], vector<Item>& theBears, int key, string& mess);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& bears);
 	void endProgram();
 	//local variable declarations 
@@ -96,7 +96,7 @@ int main()
 	{
 		if (isArrowKey(key))
 		{
-			updateGameData(grid, theBears, key, message);		//move bear in that direction
+			updateGameData(grid, maze, theBears, key, message);		//move bear in that direction
 			updateGrid(grid, maze, theBears);					//update grid information
 		}
 		else
@@ -139,7 +139,7 @@ void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+	= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 		{ 1, 0, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
@@ -171,19 +171,19 @@ void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears)
 { //extract bear's coordinates from initial maze info
 	for (int row(0); row < SIZEY; ++row)
-		for (int col(0); col < SIZEX; ++col)
-			for (int i = 0; i < theBears.size(); i++)
-				switch (maze[row][col])
-			{
-				case BEAR:
-				{
-					theBears[i].x = col;
-					theBears[i].y = row;
-					maze[row][col] = TUNNEL;
-				}
-				break;
-				//will work for other items too
-			}
+	for (int col(0); col < SIZEX; ++col)
+	for (int i = 0; i < theBears.size(); i++)
+		switch (maze[row][col])
+	{
+		case BEAR:
+		{
+					 theBears[i].x = col;
+					 theBears[i].y = row;
+					 maze[row][col] = TUNNEL;
+		}
+			break;
+			//will work for other items too
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -205,8 +205,8 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], vector<Item>& theB
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 { //reset the empty/fixed maze configuration into grid
 	for (int row(0); row < SIZEY; ++row)
-		for (int col(0); col < SIZEX; ++col)
-			grid[row][col] = maze[row][col];
+	for (int col(0); col < SIZEX; ++col)
+		grid[row][col] = maze[row][col];
 }
 
 void placeBears(char g[][SIZEX], vector<Item>& theBears)
@@ -217,10 +217,12 @@ void placeBears(char g[][SIZEX], vector<Item>& theBears)
 }
 
 
+
+
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key, string& mess)
+void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears, const int key, string& mess)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -245,18 +247,36 @@ void updateGameData(const char g[][SIZEX], vector<Item>& theBears, const int key
 			cout << '\a';		//beep the alarm
 			mess = "CANNOT GO THERE!";
 			break;
+
 		case BEAR:
 			cout << '\a';		//beep the alarm
 			mess = "CANNOT GO THERE!";
 			break;
 
 		case EXIT:
-			cout << '\a';
-			int countBear = 0;
-			theBears.erase(theBears.begin() + i);
-			mess = "BEAR SAVED!";
-			countBear + 1;
+		{
+					 cout << '\a';
+					 int countBear = 0;
+					 theBears.erase(theBears.begin() + i);
+					 mess = "BEAR SAVED!";
+					 countBear + 1;
+					 break;
+		}
+
+		case TRIGGER:
+		{
+						//Slot for trigger code
+						break;
+		}
+
+		case BOMB:
+		{
+					 cout << '\a';
+					 maze[theBears[i].y + dy][theBears[i].x + dx] = ' ';
+					 theBears.erase(theBears.begin() + i);
+					 mess = "BOMB HIT!";
 			break;
+		}
 	}
 }
 //---------------------------------------------------------------------------
