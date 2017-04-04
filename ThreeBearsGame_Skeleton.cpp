@@ -1,5 +1,5 @@
-//---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c – group assignment
+ï»¿//---------------------------------------------------------------------------
+//Program: Skeleton for Task 1c ï¿½ group assignment
 //Author: Pascale Vacher
 //Last updated: 24 February 2017
 //---------------------------------------------------------------------------
@@ -16,6 +16,7 @@
 #include <cassert> 
 #include <string>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 //include our own libraries
@@ -40,33 +41,40 @@ const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
 const int  RIGHT(77);		//right arrow
 const int  LEFT(75);		//left arrow
+
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
 struct Item {
 	int x, y;
 	char symbol;
-	bool bearActive;
 };
 
 //---------------------------------------------------------------------------
 //----- run game
 //---------------------------------------------------------------------------
 
+
 int main()
 {
-	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree);
-	void paintGame(const char g[][SIZEX], string mess);
 
+	string playerName;
+
+	void mainMenu(string&);
+
+	//calls the main menu
+	mainMenu(playerName);
+
+	//function declarations (prototypes)
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bears);
+	void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName, bool cheatMode);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
+	bool cheatMode = false;
 	int  getKeyPress();
-
-	void updateGameData(char grid[][SIZEX], char maze[][SIZEX],Item& bear, Item bearTwo, Item bearThree, const int key, string& mess);
-	void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
+	void updateGameData(char g[][SIZEX], char m[][SIZEX], vector<Item>& theBears, int key, string& mess, bool cheatMode);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& bears);
 	void endProgram();
-
 	//local variable declarations 
 
 	char grid[SIZEY][SIZEX];
@@ -75,60 +83,84 @@ int main()
 	char maze[SIZEY][SIZEX];
 	//structure of the maze
 
-	//bear's position and symbol
-	Item bear = { 0, 0, BEAR };
-	Item bearTwo = { 0, 0, BEAR };
-	Item bearThree = { 0, 0, BEAR };
+	Item bear = { 1, 0, BEAR };
+	Item bearTwo = { 1, 1, BEAR };
+	Item bearThree = { 1, 2, BEAR };
+	vector<Item> theBears = { bear, bearTwo, bearThree };//Bears vector
 
 	string message("LET'S START...");	//current message to player
 
 	//action...
-	initialiseGame(grid, maze, bear, bearTwo, bearThree);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message);			//display game info, modified grid & messages
+	initialiseGame(grid, maze, theBears);	//initialise grid (incl. walls & bear)
+	paintGame(grid, message, theBears, BEAR, playerName, cheatMode);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
-		if (isArrowKey(key))
+		if (key == 'C')
 		{
-			updateGameData(grid, maze, bear, bearTwo, bearThree, key, message);		//move bear in that direction
-			updateGrid(grid, maze, bear, bearTwo, bearThree);			//update grid information
+			cheatMode = !cheatMode;
+			message = "CHEAT MODE ON!";
+			cout << '\a';
+
 		}
 		else
-			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message);		//display game info, modified grid & messages
+		{
+			if (isArrowKey(key))
+			{
+				updateGameData(grid, maze, theBears, key, message, cheatMode);		//move bear in that direction
+				updateGrid(grid, maze, theBears);					//update grid information
+			}
+			else
+			{
+				message = "INVALID KEY!";	//set 'Invalid key' message
+
+			}
+		}
+		paintGame(grid, message, theBears, BEAR, playerName, cheatMode);		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
 	return 0;
 }
 
+void mainMenu(string& playerName)
+{
+	void showMessage(WORD backColour, WORD textColour, int x, int y, const string message);
+	showMessage(clRed, clYellow, 40, 10, "3 Bears Project 2016-17");
+	showMessage(clRed, clYellow, 40, 11, "Team DAB 2.0");
+	showMessage(clBlue, clWhite, 40, 12, "Player Name: ");
+	cin >> playerName;		//allows the player to enter his name
+	SelectBackColour(clBlack);		//resets the background colour to black when the screen clears
+	Clrscr();
+
+}
 
 //---------------------------------------------------------------------------
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], vector<Item>& theBears)
 { //initialise grid & place bear in middle
-	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setInitialDataFromMaze(char maze[][SIZEX], Item& b, Item& b2, Item& b3);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Item b, Item b2, Item b3);
+	void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears);
+	void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& theBears);
 
-	setInitialMazeStructure(maze);		//initialise maze
-	setInitialDataFromMaze(maze, bear, bearTwo, bearThree);	//initialise bear's position
-	updateGrid(grid, maze, bear, bearTwo, bearThree);		//prepare grid
+	setInitialMazeStructure(maze, theBears);		//initialise maze
+	setInitialDataFromMaze(maze, theBears);	//initialise bear's position
+	updateGrid(grid, maze, theBears);		//prepare grid
 }
 
-void setInitialMazeStructure(char maze[][SIZEX])
+void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-	= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 1, 2, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
+		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		{ 1, 0, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
 		{ 1, 2, 1, 0, 1, 3, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
-		{ 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1 },
+		{ 1, 2, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1 },
 		{ 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1 },
 		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
@@ -151,39 +183,36 @@ void setInitialMazeStructure(char maze[][SIZEX])
 		}
 	}
 }
-void setInitialDataFromMaze(char maze[][SIZEX], Item& bear, Item& bearTwo, Item& bearThree)
+void setInitialDataFromMaze(char maze[][SIZEX], vector<Item>& theBears)
 { //extract bear's coordinates from initial maze info
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
-			switch (maze[row][col])
-		{
-			case BEAR:
+			for (int i = 0; i < theBears.size(); i++)
+				switch (maze[row][col])
 			{
-				bear.x = col;
-				bear.y = row;
-				bearTwo.x = col;
-				bearTwo.y = row;
-				bearThree.x = col;
-				bearThree.y = row;
-				maze[row][col] = TUNNEL;
+				case BEAR:
+				{
+					theBears[i].x = col;
+					theBears[i].y = row;
+					maze[row][col] = TUNNEL;
+				}
+				break;
+				//will work for other items too
 			}
-			break;
-			//will work for other items too
-		}
 }
 
 //---------------------------------------------------------------------------
 //----- update grid state
 //---------------------------------------------------------------------------
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], vector<Item>& theBears)
 { //update grid configuration after each move
 	void setMaze(char g[][SIZEX], const char b[][SIZEX]);
-	void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
+	void placeBears(char g[][SIZEX], vector<Item>& theBears);
 
 
 	setMaze(grid, maze);	//reset the empty maze configuration into grid
-	placeBears(grid, bear, bearTwo, bearThree);
+	placeBears(grid, theBears);
 
 	//set bear in grid
 }
@@ -191,25 +220,20 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, c
 void setMaze(char grid[][SIZEX], const char maze[][SIZEX])
 { //reset the empty/fixed maze configuration into grid
 	for (int row(0); row < SIZEY; ++row)
-	{
 		for (int col(0); col < SIZEX; ++col)
-		{
 			grid[row][col] = maze[row][col];
-		}
-	}
 }
 
-void placeBears(char g[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
+void placeBears(char g[][SIZEX], vector<Item>& theBears)
 { //place bear at its new position in grid
-	g[bear.y][bear.x] = bear.symbol;
-	g[bearTwo.y][bearTwo.x + 1] = bearTwo.symbol;
-	g[bearThree.y][bearThree.x - 2] = bearThree.symbol;
+	for (int i = 0; i < theBears.size(); i++) //for Loop for passing x and y into bears vector
 
+		g[theBears[i].y][theBears[i].x] = theBears[i].symbol;
 }
 
-void triggerBombs(char grid[][SIZEX], char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree)
+void triggerBombs(char grid[][SIZEX], char maze[][SIZEX], vector<Item>& theBears)
 {
-	void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item bear, const Item bearTwo, const Item bearThree);
+	void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], vector<Item>& theBears);
 
 	for (int row(0); row < SIZEY; ++row)
 	{
@@ -219,62 +243,95 @@ void triggerBombs(char grid[][SIZEX], char maze[][SIZEX], const Item bear, const
 			{
 				maze[row][col] = TUNNEL;
 			}
-			
+
 		}
 	}
 
-	updateGrid(grid, maze, bear, bearTwo, bearThree);
+	updateGrid(grid, maze, theBears);
 }
+
 
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(char grid[][SIZEX], char maze[][SIZEX], Item& bear, Item bearTwo, Item bearThree, const int key, string& mess)
+void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears, const int key, string& mess, bool cheatMode)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
-	void triggerBombs(char maze[][SIZEX], char grid[][SIZEX],  Item bear,  Item bearTwo,  Item bearThree);
-	assert(isArrowKey(key));
+	void triggerBombs(char maze[][SIZEX], char grid[][SIZEX], vector<Item>& theBears);
 
-	
+	//reset message to blank
 	mess = "                                         ";		//reset message to blank
 
 	//calculate direction of movement for given key
 	int dx(0), dy(0);
 	setKeyDirection(key, dx, dy);
-
-	//check new target position in grid and update game data (incl. bear coordinates) if move is possible
-	switch (grid[bear.y + dy][bear.x + dx])
+	for (int i = 0; i < theBears.size(); i++)
+		//check new target position in grid and update game data (incl. bear coordinates) if move is possible
+		switch (g[theBears[i].y + dy][theBears[i].x + dx])
 	{			//...depending on what's on the target position in grid...
-	case TUNNEL:		//can move
-		bear.y += dy;	//go in that Y direction
-		bear.x += dx;	//go in that X direction
-		break;
-	case WALL:  		//hit a wall and stay there
-		cout << '\a';	//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
-	case BEAR:
-		cout << '\a';	//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
-	case TRIGGER:
-		bear.y += dy;	
-		bear.x += dx;
-		triggerBombs(grid, maze, bear, bearTwo, bearThree);
-		mess = "Trigger activated!";
-		break;
+		case TUNNEL:			//can move
+			theBears[i].y += dy;		//go in that Y direction
+			theBears[i].x += dx;		//go in that X direction
 
-	//case bomb:
-	//	//Place in bomb handling here
-	//	break;
+			break;
+		case WALL:  			//hit a wall and stay there
+			cout << '\a';		//beep the alarm
+			mess = "CANNOT GO THERE!";
+			break;
 
-	//case EXIT:
-	//	//Place in exit handling here
-	//	break;
+		case BEAR:
+			cout << '\a';		//beep the alarm
+			mess = "CANNOT GO THERES!";
+			break;
 
+		case EXIT:
+		{
+			cout << '\a';
+			int countBear = 0;
+			theBears.erase(theBears.begin() + i);
+			mess = "BEAR SAVED!";
+			countBear + 1;
+			break;
+		}
+
+		case TRIGGER:
+		{
+			if (cheatMode == false)
+			{
+		
+			theBears[i].y += dy;		//go in that Y direction
+			theBears[i].x += dx;        //go in that X direction
+			triggerBombs(g, maze, theBears); 
+			mess = "Trigger activated!";
+			
+			}
+			else
+			{
+				theBears[i].y += dy;		//go in that Y direction
+				theBears[i].x += dx;		//go in that X direction
+			}
+
+			break;
+		}
+
+		case BOMB:
+		{
+			if (cheatMode == false)
+			{
+				cout << '\a';                                       //Play an audio alert to let the player know
+				maze[theBears[i].y + dy][theBears[i].x + dx] = ' '; //delete the bomb by modifying the maze
+				theBears.erase(theBears.begin() + i);               //remove the bear from the vector
+				mess = "BOMB HIT!";                                 //message the player that a bombs been hit
+			}
+			else
+			{
+				theBears[i].y += dy;		//go in that Y direction
+				theBears[i].x += dx;		//go in that X direction
+			}
+			break;
+		}
 	}
-
 }
 //---------------------------------------------------------------------------
 //----- process key
@@ -282,7 +339,7 @@ void updateGameData(char grid[][SIZEX], char maze[][SIZEX], Item& bear, Item bea
 void setKeyDirection(const int key, int& dx, int& dy)
 { //calculate direction indicated by key
 	bool isArrowKey(const int k);
-	assert(isArrowKey(key));
+
 	switch (key)	//...depending on the selected key...
 	{
 	case LEFT:  	//when LEFT arrow pressed...
@@ -301,6 +358,7 @@ void setKeyDirection(const int key, int& dx, int& dy)
 		dx = 0;
 		dy = +1;	//increase the Y coordinate
 		break;
+
 	}
 }
 
@@ -332,7 +390,6 @@ string tostring(char x) {
 	os << x;
 	return os.str();
 }
-
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message)
 {
 	Gotoxy(x, y);
@@ -340,11 +397,14 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess)
+void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName, bool cheatMode)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	void paintGrid(const char g[][SIZEX]);
+
+	//display Player Name
+	showMessage(clWhite, clRed, 40, 0, playerName);
 
 	//display game title
 	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
@@ -353,6 +413,26 @@ void paintGame(const char g[][SIZEX], string mess)
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
+	showMessage(clRed, clYellow, 40, 4, "TO ENTER CHEAT MODE ENTER 'C'          ");
+
+	//print auxiliary messages if any
+	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
+
+	//display rescued bears
+
+	showMessage(clBlack, clYellow, 0, 2, "Rescued Bears: ");
+	string cheatModeActive;
+	if (cheatMode == true)
+	{
+		cheatModeActive = "Yes";
+	}
+	else
+	{
+		cheatModeActive = "No";
+	}
+	showMessage(clBlack, clYellow, 0, 3, "Cheat mode: " + cheatModeActive);
+
+
 
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
@@ -365,7 +445,7 @@ void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	SelectBackColour(clBlack);
 	SelectTextColour(clWhite);
-	Gotoxy(0, 2);
+	Gotoxy(0, 6);
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col)
