@@ -41,6 +41,7 @@ const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
 const int  RIGHT(77);		//right arrow
 const int  LEFT(75);		//left arrow
+
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 
@@ -66,11 +67,12 @@ int main()
 
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], vector<Item>& bears);
-	void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName);
+	void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName, bool cheatMode);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
+	bool cheatMode = false;
 	int  getKeyPress();
-	void updateGameData(char g[][SIZEX], char m[][SIZEX], vector<Item>& theBears, int key, string& mess);
+	void updateGameData(char g[][SIZEX], char m[][SIZEX], vector<Item>& theBears, int key, string& mess, bool cheatMode);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], vector<Item>& bears);
 	void endProgram();
 	//local variable declarations 
@@ -90,18 +92,31 @@ int main()
 
 	//action...
 	initialiseGame(grid, maze, theBears);	//initialise grid (incl. walls & bear)
-	paintGame(grid, message, theBears, BEAR, playerName);			//display game info, modified grid & messages
+	paintGame(grid, message, theBears, BEAR, playerName, cheatMode);			//display game info, modified grid & messages
 	int key(getKeyPress()); 			//read in  selected key: arrow or letter command
 	while (!wantsToQuit(key))			//while user does not want to quit
 	{
-		if (isArrowKey(key))
+		if (key == 'C')
 		{
-			updateGameData(grid, maze, theBears, key, message);		//move bear in that direction
-			updateGrid(grid, maze, theBears);					//update grid information
+			cheatMode = !cheatMode;
+			message = "CHEAT MODE ON!";
+			cout << '\a';
+			
 		}
 		else
-			message = "INVALID KEY!";	//set 'Invalid key' message
-		paintGame(grid, message, theBears, BEAR, playerName);		//display game info, modified grid & messages
+		{
+			if (isArrowKey(key))
+			{
+				updateGameData(grid, maze, theBears, key, message, cheatMode);		//move bear in that direction
+				updateGrid(grid, maze, theBears);					//update grid information
+			}
+			else
+			{
+				message = "INVALID KEY!";	//set 'Invalid key' message
+
+			}
+		}
+		paintGame(grid, message, theBears, BEAR, playerName, cheatMode);		//display game info, modified grid & messages
 		key = getKeyPress(); 			//display menu & read in next option
 	}
 	endProgram();						//display final message
@@ -139,7 +154,7 @@ void setInitialMazeStructure(char maze[][SIZEX], vector<Item>& theBears)
 { //set the position of the walls in the maze
 	//initialise maze configuration
 	int initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-	= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+		= { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
 		{ 1, 0, 3, 0, 3, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1 },
 		{ 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
 		{ 1, 0, 1, 0, 1, 5, 0, 0, 0, 3, 0, 1, 0, 1, 0, 1 },
@@ -222,11 +237,11 @@ void placeBears(char g[][SIZEX], vector<Item>& theBears)
 //---------------------------------------------------------------------------
 //----- move the bear
 //---------------------------------------------------------------------------
-void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears, const int key, string& mess)
+void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears, const int key, string& mess, bool cheatMode)
 { //move bear in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
-	assert(isArrowKey(key));
+
 
 	//reset message to blank
 	mess = "                                         ";		//reset message to blank
@@ -250,7 +265,7 @@ void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears,
 
 		case BEAR:
 			cout << '\a';		//beep the alarm
-			mess = "CANNOT GO THERE!";
+			mess = "CANNOT GO THERES!";
 			break;
 
 		case EXIT:
@@ -265,17 +280,36 @@ void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears,
 
 		case TRIGGER:
 		{
-						//Slot for trigger code
+						if (cheatMode == false)
+						{
+							//////////////////////////////////////////////////////////////
+							//Slot for trigger code///////////////////////////////////////
+							//////////////////////////////////////////////////////////////
+						}
+						else
+						{
+							theBears[i].y += dy;		//go in that Y direction
+							theBears[i].x += dx;		//go in that X direction
+						}
+
 						break;
 		}
 
 		case BOMB:
 		{
-					 cout << '\a';                                       //Play an audio alert to let the player know
-					 maze[theBears[i].y + dy][theBears[i].x + dx] = ' '; //delete the bomb by modifying the maze
-					 theBears.erase(theBears.begin() + i);               //remove the bear from the vector
-					 mess = "BOMB HIT!";                                 //message the player that a bombs been hit
-			break;
+					 if (cheatMode == false)
+					 {
+						 cout << '\a';                                       //Play an audio alert to let the player know
+						 maze[theBears[i].y + dy][theBears[i].x + dx] = ' '; //delete the bomb by modifying the maze
+						 theBears.erase(theBears.begin() + i);               //remove the bear from the vector
+						 mess = "BOMB HIT!";                                 //message the player that a bombs been hit
+					 }
+					 else
+					 {
+						 theBears[i].y += dy;		//go in that Y direction
+						 theBears[i].x += dx;		//go in that X direction
+					 }
+					 break;
 		}
 	}
 }
@@ -285,7 +319,7 @@ void updateGameData(char g[][SIZEX], char maze[][SIZEX], vector<Item>& theBears,
 void setKeyDirection(const int key, int& dx, int& dy)
 { //calculate direction indicated by key
 	bool isArrowKey(const int k);
-	assert(isArrowKey(key));
+
 	switch (key)	//...depending on the selected key...
 	{
 	case LEFT:  	//when LEFT arrow pressed...
@@ -304,6 +338,7 @@ void setKeyDirection(const int key, int& dx, int& dy)
 		dx = 0;
 		dy = +1;	//increase the Y coordinate
 		break;
+
 	}
 }
 
@@ -342,7 +377,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	SelectTextColour(textColour);
 	cout << message;
 }
-void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName)
+void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const char BEAR, string& playerName, bool cheatMode)
 { //display game title, messages, maze, bear and other items on screen
 	string tostring(char x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
@@ -358,6 +393,7 @@ void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const
 	//display menu options available
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT ENTER 'Q'           ");
+	showMessage(clRed, clYellow, 40, 4, "TO ENTER CHEAT MODE ENTER 'C'          ");
 
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
@@ -365,6 +401,16 @@ void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const
 	//display rescued bears
 
 	showMessage(clBlack, clYellow, 0, 2, "Rescued Bears: ");
+	string cheatModeActive;
+	if (cheatMode == true)
+	{
+		cheatModeActive = "Yes";
+	}
+	else
+	{
+		cheatModeActive = "No";
+	}
+	showMessage(clBlack, clYellow, 0, 2, "Cheat mode: " +  cheatModeActive);
 
 
 
