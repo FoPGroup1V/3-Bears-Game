@@ -46,7 +46,7 @@ const int  LEFT(75);		//left arrow
 //defining the other command letters
 const char QUIT('Q');		//to end the game
 //score
-int score(0);
+int score(0); //Change this from a global!
 
 struct Item {
 	int x, y;
@@ -108,7 +108,7 @@ int main()
 			cheatMode = !cheatMode;
 			message = "CHEAT MODE ON!";
 			cout << '\a';
-
+                        score = 500;
 		}
 		else
 		{
