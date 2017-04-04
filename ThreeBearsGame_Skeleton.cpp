@@ -17,6 +17,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 //include our own libraries
@@ -44,12 +45,18 @@ const int  LEFT(75);		//left arrow
 
 //defining the other command letters
 const char QUIT('Q');		//to end the game
+//score
+int score(0);
 
 struct Item {
 	int x, y;
 	char symbol;
 };
 
+ifstream inUsername;
+ofstream outUsername;
+ifstream inPlayerScore;
+ofstream outPlayerScore;
 //---------------------------------------------------------------------------
 //----- run game
 //---------------------------------------------------------------------------
@@ -125,12 +132,15 @@ int main()
 
 void mainMenu(string& playerName)
 {
+	void fileInName(string& playerName);
 	void showMessage(WORD backColour, WORD textColour, int x, int y, const string message);
 	showMessage(clRed, clYellow, 40, 10, "3 Bears Project 2016-17");
 	showMessage(clRed, clYellow, 40, 11, "Team DAB 2.0");
 	showMessage(clBlue, clWhite, 40, 12, "Player Name: ");
+	outUsername.open("PlayerName.txt", ios::out);
 	cin >> playerName;		//allows the player to enter his name
 	SelectBackColour(clBlack);		//resets the background colour to black when the screen clears
+	fileInName(playerName);
 	Clrscr();
 
 }
@@ -340,6 +350,11 @@ void setKeyDirection(const int key, int& dx, int& dy)
 { //calculate direction indicated by key
 	bool isArrowKey(const int k);
 
+	assert(isArrowKey(key));
+	if (isArrowKey(key) == true){
+		score++;
+	}
+
 	switch (key)	//...depending on the selected key...
 	{
 	case LEFT:  	//when LEFT arrow pressed...
@@ -432,8 +447,14 @@ void paintGame(const char g[][SIZEX], string mess, vector<Item>& theBears, const
 	}
 	showMessage(clBlack, clYellow, 0, 3, "Cheat mode: " + cheatModeActive);
 
+	void fileInScore(int& score);
+
+	outPlayerScore.open("PlayerName.txt", ios::out);
 
 
+	showMessage(clBlack, clYellow, 40, 5, "SCORE: ");
+	cout << score;
+	fileInScore(score);
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
@@ -459,4 +480,23 @@ void endProgram()
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string message);
 	showMessage(clRed, clYellow, 40, 8, "");	//hold output screen until a keyboard key is hit
 	system("pause");
+
+}
+////////////////////////////////////////////////////////file in/out functions
+void fileInName(string& playerName){
+	outUsername << "Username: ";
+	outUsername << playerName + "	";
+	if (outUsername.fail()){
+		cout << "\nAn error has ocurred when openiong the file.";
+	}
+	outUsername.close();
+}
+void fileInScore(int& score){
+	outPlayerScore << "Score: ";
+	outPlayerScore << score;
+	if (outPlayerScore.fail()){
+		cout << "\nAn error has occured when opening the file.";
+	}
+	outPlayerScore.close();
+
 }
